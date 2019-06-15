@@ -10,12 +10,12 @@ import itertools
 class DataReader:
     def __init__(self):
         self.nusc = NuScenes(version='v1.0-mini', dataroot='../data/sets/nuscenes', verbose=False)
-        self.scene = self.nusc.scene[0]
+        self.sceneID = 0
+        self.scene = self.nusc.scene[self.sceneID]
         self.current_sample = self.nusc.get('sample', self.scene['first_sample_token'])
         print('Data Reader Initialized')
 
     def getNextRadarPCL(self):
-
         radar_front_data = self.nusc.get('sample_data', self.current_sample['data']['RADAR_FRONT'])
         radar_front_left_data = self.nusc.get('sample_data', self.current_sample['data']['RADAR_FRONT_LEFT'])
         radar_front_right_data = self.nusc.get('sample_data', self.current_sample['data']['RADAR_FRONT_RIGHT'])
@@ -74,11 +74,19 @@ class DataReader:
 
         pc = np.concatenate((pc_f, pc_fl, pc_fr, pc_bl, pc_br))
 
+        ego_pose = self.nusc.get('ego_pose', radar_front_data['ego_pose_token'])
 
         if self.current_sample['next'] == "":
             self.current_sample = self.nusc.get('sample', self.scene['first_sample_token'])
-            #break
+            pc = None
         else:
             self.current_sample = self.nusc.get('sample', self.current_sample['next'])
 
-        return pc
+        return pc, ego_pose
+
+    def nextScene(self):
+        self.sceneID = self.sceneID + 1
+        if self.sceneID >= len(self.nusc.scene):
+            self.sceneID = 0
+        self.scene = self.nusc.scene[self.sceneID]
+        self.current_sample = self.nusc.get('sample', self.scene['first_sample_token'])

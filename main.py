@@ -12,6 +12,14 @@ if __name__== "__main__":
     preproc = preprocessing.Preprocessing()
 
     while True:
-        pc = dr.getNextRadarPCL()
-        grid = preproc.getRadarGrid(pc)
-        eval.plot_pcl(pc, 2)
+        pc, pose = dr.getNextRadarPCL()
+        if pc is None:
+            eval.reset()
+            dr.nextScene()
+            preproc = preprocessing.Preprocessing()
+            pc, pose = dr.getNextRadarPCL()
+        grid = preproc.getRadarGrid(pc, pose)
+        eval.plotPcl(pc, 2)
+        eval.plotGrid(grid)
+        eval.plotTrajectory(pose)
+        eval.draw()
