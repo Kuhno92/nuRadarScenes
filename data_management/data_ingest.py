@@ -90,3 +90,4 @@ class DataReader:
             self.sceneID = 0
         self.scene = self.nusc.scene[self.sceneID]
         self.current_sample = self.nusc.get('sample', self.scene['first_sample_token'])
+        return self.sceneID

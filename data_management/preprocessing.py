@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import data_management.tfrecord_manager as tfrecord_manager
 import numpy as np
 from transforms3d import quaternions, affines, euler
 
@@ -76,3 +77,20 @@ class Preprocessing:
             y_index = int(self.grid_elements_y / 2 + p[1] // self.grid_element_size_y)
             x_index = int(self.grid_elements_x / 2 + p[0] // self.grid_element_size_x)
             self.grid[y_index][x_index].locations.append(p)
+
+    def addGrid2File(self):
+        img = []
+        i = 0
+        for row in self.grid:
+            img.append([])
+            for e in row:
+                img[i].append(len(e.locations))
+            i = i + 1
+
+        tfrecord_manager.addFrame(img, img)
+
+    def closeFile(self):
+        tfrecord_manager.writeFile()
+
+    def readFile(self):
+        tfrecord_manager.readFile()
